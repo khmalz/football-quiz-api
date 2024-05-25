@@ -3,6 +3,14 @@
       {
          "src": "api/index.ts",
          "use": "@vercel/node"
+      },
+      {
+         "src": "lib/**/*",
+         "use": "@vercel/node"
+      },
+      {
+         "src": "data/**/*",
+         "use": "@vercel/node"
       }
    ],
    "rewrites": [
