@@ -23,8 +23,12 @@ app.get("/hello/:name", c => {
 });
 
 app.get("/users", async c => {
-   const users = await retrieveData("users");
-   return c.json({ status: true, statusCode: 200, data: users });
+   try {
+      const users = await retrieveData("users");
+      return c.json({ status: true, statusCode: 200, data: users });
+   } catch (error) {
+      throw error;
+   }
 });
 
 const validCategories = ["championsleague", "premierleague", "laliga"];
