@@ -66,5 +66,8 @@ app.get(
 app.use(errorMiddleware);
 app.onError(errorHandler);
 
+// in development
 // export default app;
+
+// in vercel deployment
 export default handle(app);
