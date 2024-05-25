@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { validator } from "hono/validator";
 import { handle } from "hono/vercel";
 
-import { retrieveDataSubByDocId } from "../lib/firestore/service";
+import { retrieveData, retrieveDataSubByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 
 export const config = {
@@ -20,6 +20,11 @@ app.get("/", c => {
 app.get("/hello/:name", c => {
    const { name } = c.req.param();
    return c.json({ data: `Hello, ${name}!` });
+});
+
+app.get("/users", async c => {
+   const users = await retrieveData("users");
+   return c.json({ status: true, statusCode: 200, data: users });
 });
 
 const validCategories = ["championsleague", "premierleague", "laliga"];
