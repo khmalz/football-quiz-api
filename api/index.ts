@@ -66,5 +66,5 @@ app.get(
 app.use(errorMiddleware);
 app.onError(errorHandler);
 
-export default app;
-// export default handle(app);
+// export default app;
+export default handle(app);
