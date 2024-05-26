@@ -1,28 +1,23 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { validator } from "hono/validator";
-import { handle } from "hono/vercel";
 
 import { retrieveData, retrieveDataSubByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 
-export const config = {
-   runtime: "edge",
-};
+const api = new Hono({ strict: false });
+api.use("/*", cors());
 
-const app = new Hono().basePath("/api");
-app.use("/api/*", cors());
-
-app.get("/", c => {
-   return c.json({ message: "Hello Hono with Bun!" });
+api.get("/", c => {
+   return c.json({ message: "Hello API with Hono!" });
 });
 
-app.get("/hello/:name", c => {
+api.get("/hello/:name", c => {
    const { name } = c.req.param();
    return c.json({ data: `Hello, ${name}!` });
 });
 
-app.get("/users", async c => {
+api.get("/users", async c => {
    try {
       const users = await retrieveData("users");
       return c.json({ status: true, statusCode: 200, data: users });
@@ -33,7 +28,7 @@ app.get("/users", async c => {
 
 const validCategories = ["championsleague", "premierleague", "laliga"];
 
-app.get(
+api.get(
    "/questions/category/:category",
    validator("param", (value: { category: string }, c) => {
       const { category } = value;
@@ -63,11 +58,7 @@ app.get(
    }
 );
 
-app.use(errorMiddleware);
-app.onError(errorHandler);
+api.use(errorMiddleware);
+api.onError(errorHandler);
 
-// in development
-// export default app;
-
-// in vercel deployment
-export default handle(app);
+export default api;
