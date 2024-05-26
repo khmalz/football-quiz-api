@@ -1,7 +1,5 @@
 import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
-
-import { questionsRoute, sayHello, testingConnection } from "../data/swagger/routes";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 
 const doc = new OpenAPIHono();
 
@@ -13,68 +11,58 @@ doc.doc("/", {
    },
 });
 
-// @ts-ignore
-doc.openapi(sayHello, c => {
-   return c.json(
-      {
-         data: "Hello, World",
-      },
-      200
-   );
-});
-
-// @ts-ignore
-doc.openapi(testingConnection, c => {
-   return c.json(
-      {
-         status: true,
-         statusCode: 200,
-         data: [
-            {
-               id: "1BJB21",
-               name: "Name",
-            },
-         ],
-      },
-      200
-   );
-});
-
-// @ts-ignore
-doc.openapi(questionsRoute, c => {
-   // @ts-ignore
-   const { category } = c.req.valid("param");
-
-   return c.json(
-      {
-         status: true,
-         statusCode: 200,
-         data: {
-            type: category,
-            questions: [
-               {
-                  question: "Question",
-                  options: ["A", "B", "C", "D"],
-                  answer: "Answer",
+doc.openapi(
+   {
+      tags: ["Testing"],
+      method: "get",
+      path: "/api/hello",
+      request: {
+         query: z.object({
+            name: z.string().openapi({
+               param: {
+                  name: "name",
+                  in: "query",
+                  required: false,
                },
-            ],
+               type: "String",
+               example: "John",
+            }),
+         }),
+      },
+      responses: {
+         200: {
+            content: {
+               "application/json": {
+                  schema: z.object({
+                     data: z.string().default("Hello, World!"),
+                  }),
+               },
+            },
+            description: "Successful response",
+         },
+         500: {
+            content: {
+               "application/json": {
+                  schema: z.object({
+                     status: z.boolean().default(false),
+                     statusCode: z.number().default(500),
+                     message: z.string().default("Internal Server Error"),
+                  }),
+               },
+            },
+            description: "Internal server error response",
          },
       },
-      200
-   );
-});
-
-// const DisableTryItOutPlugin = function () {
-//    return {
-//       statePlugins: {
-//          spec: {
-//             wrapSelectors: {
-//                allowTryItOutFor: () => () => false,
-//             },
-//          },
-//       },
-//    };
-// };
+   },
+   c => {
+      return c.json(
+         {
+            data: "Hello, World",
+         },
+         200
+      );
+   }
+);
 
 // @ts-ignore
 doc.get("/ui", swaggerUI({ url: "/doc" }));
