@@ -64,19 +64,19 @@ doc.openapi(questionsRoute, c => {
    );
 });
 
-const DisableTryItOutPlugin = function () {
-   return {
-      statePlugins: {
-         spec: {
-            wrapSelectors: {
-               allowTryItOutFor: () => () => false,
-            },
-         },
-      },
-   };
-};
+// const DisableTryItOutPlugin = function () {
+//    return {
+//       statePlugins: {
+//          spec: {
+//             wrapSelectors: {
+//                allowTryItOutFor: () => () => false,
+//             },
+//          },
+//       },
+//    };
+// };
 
 // @ts-ignore
-doc.get("/ui", swaggerUI({ url: "/doc", plugins: [DisableTryItOutPlugin] }));
+doc.get("/ui", swaggerUI({ url: "/doc" }));
 
 export default doc;
