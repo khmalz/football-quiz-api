@@ -5,6 +5,10 @@ import api from "./api";
 import home from "./home";
 import doc from "./doc";
 
+export const config = {
+   runtime: "edge",
+};
+
 const app = new Hono();
 app.route("/", home);
 app.route("/api", api);
