@@ -12,9 +12,9 @@ api.get("/", c => {
    return c.json({ message: "Hello API with Hono!" });
 });
 
-api.get("/hello/:name", c => {
-   const { name } = c.req.param();
-   return c.json({ data: `Hello, ${name}!` });
+api.get("/hello", c => {
+   const { name } = c.req.query();
+   return c.json({ data: `Hello, ${name || "World"}!` });
 });
 
 api.get("/users", async c => {

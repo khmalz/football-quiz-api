@@ -5,6 +5,8 @@
     "dev": "bun run --hot routes/index.ts"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.2.2",
+    "@hono/zod-openapi": "^0.14.0",
     "firebase": "10.6.0",
     "hono": "^4.3.10"
   },

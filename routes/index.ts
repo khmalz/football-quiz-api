@@ -3,6 +3,7 @@ import { handle } from "hono/vercel";
 
 import api from "./api";
 import home from "./home";
+import doc from "./doc";
 
 export const config = {
    runtime: "edge",
@@ -11,6 +12,7 @@ export const config = {
 const app = new Hono();
 app.route("/", home);
 app.route("/api", api);
+app.route("/doc", doc);
 
 // in development
 // export default app;
