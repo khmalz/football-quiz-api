@@ -1,17 +1,8 @@
 import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { Hono } from "hono";
 
-const doc = new OpenAPIHono();
+const doc = new Hono();
 
-doc.doc("/", {
-   openapi: "3.1.0",
-   info: {
-      version: "1.0.0",
-      title: "Football Quiz API",
-   },
-});
-
-// @ts-ignore
-doc.get("/ui", swaggerUI({ url: "/doc" }));
+doc.get("/ui", swaggerUI({ url: "/", version: "3.1.0" }));
 
 export default doc;
