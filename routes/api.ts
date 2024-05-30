@@ -21,7 +21,7 @@ api.get("/hello", c => {
 api.get("/users", async c => {
    try {
       const users = await retrieveData("users");
-      return c.json({ status: true, statusCode: 200, data: users });
+      return c.json({ success: true, statusCode: 200, data: users });
    } catch (error) {
       throw error;
    }
@@ -46,7 +46,7 @@ api.post(
          throw new Error("Failed to add User");
       }
 
-      return c.json({ status: true, statusCode: 200, data: { id: res.id, name } });
+      return c.json({ success: true, statusCode: 200, data: { id: res.id, name } });
    }
 );
 
@@ -72,7 +72,7 @@ api.post(
 
          await addDocumentToSubCollectionWithFixedId("users", id, "scores", category, data);
 
-         return c.json({ status: true, statusCode: 200, data: { id_user: id, category, level, score } });
+         return c.json({ success: true, statusCode: 200, data: { id_user: id, category, level, score } });
       } catch (error: any) {
          throw error.message;
       }
@@ -92,7 +92,7 @@ api.get(
          if (!result.success) {
             return c.json(
                {
-                  status: false,
+                  success: false,
                   statusCode: 400,
                   message: "Invalid param",
                },
@@ -107,7 +107,7 @@ api.get(
       const questions = await retrieveDataSubByDocId("categories", category, "questions");
 
       return c.json({
-         status: true,
+         success: true,
          statusCode: 200,
          data: { type: category, questions },
       });
