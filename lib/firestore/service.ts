@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, getDoc, doc, query, where, WhereFilterOp, collectionGroup, addDoc, writeBatch, setDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, getDoc, doc, query, where, WhereFilterOp, collectionGroup, addDoc, writeBatch, updateDoc, setDoc, DocumentSnapshot } from "firebase/firestore";
 import app from "./init";
 
 const firestore = getFirestore(app);
@@ -176,9 +176,14 @@ export async function addDocumentToSubCollectionWithFixedId(collectionName: stri
    const subCollectionRef = collection(doc(firestore, collectionName, docId), subCollectionName);
    const subDocRef = doc(subCollectionRef, subDocId);
 
-   return await setDoc(subDocRef, data);
-}
+   const subDocSnap: DocumentSnapshot<any> = await getDoc(subDocRef);
 
+   if (subDocSnap.exists()) {
+      await updateDoc(subDocRef, data);
+   } else {
+      await setDoc(subDocRef, data);
+   }
+}
 
 /**
  *
