@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, getDoc, doc, query, where, WhereFilterOp, collectionGroup, addDoc, writeBatch } from "firebase/firestore";
+import { getFirestore, collection, getDocs, getDoc, doc, query, where, WhereFilterOp, collectionGroup, addDoc, writeBatch, setDoc } from "firebase/firestore";
 import app from "./init";
 
 const firestore = getFirestore(app);
@@ -171,6 +171,14 @@ export async function addManyDocumentToSubCollection(collectionName: string, doc
          throw error;
       });
 }
+
+export async function addDocumentToSubCollectionWithFixedId(collectionName: string, docId: string, subCollectionName: string, subDocId: string, data: any) {
+   const subCollectionRef = collection(doc(firestore, collectionName, docId), subCollectionName);
+   const subDocRef = doc(subCollectionRef, subDocId);
+
+   return await setDoc(subDocRef, data);
+}
+
 
 /**
  *
