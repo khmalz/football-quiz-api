@@ -74,7 +74,7 @@ api.post(
 
       const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
       if (existingUsers.length > 0) {
-         throw new HTTPException(400, { message: "Username already exists" });
+         throw new HTTPException(409, { message: "Username already exists" });
       }
 
       const hashedPassword = hashSync(password, 10);

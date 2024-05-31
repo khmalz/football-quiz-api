@@ -55,6 +55,11 @@ export const openApiSpec = {
                               description: "Must be at least 3 characters",
                               example: "John",
                            },
+                           password: {
+                              type: "string",
+                              description: "Must be at least 6 characters",
+                              example: "123456",
+                           },
                         },
                      },
                   },
@@ -105,126 +110,113 @@ export const openApiSpec = {
                      "application/json": {
                         schema: {
                            type: "object",
-                           oneOf: [
-                              {
-                                 properties: {
-                                    type: "object",
-                                    properties: {
-                                       success: {
-                                          type: "boolean",
-                                          description: "Success status",
-                                          default: false,
-                                       },
-                                       statusCode: {
-                                          type: "integer",
-                                          description: "Success status code",
-                                          default: 400,
-                                       },
-                                       message: {
-                                          type: "string",
-                                          description: "Error message",
-                                          default: "User not found",
-                                       },
-                                    },
-                                 },
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
                               },
-                              {
+                              error: {
+                                 type: "object",
+                                 description: "Error details",
                                  properties: {
-                                    type: "object",
-                                    properties: {
-                                       success: {
-                                          type: "boolean",
-                                          description: "Success status",
-                                          default: false,
-                                       },
-                                       error: {
+                                    issues: {
+                                       type: "array",
+                                       items: {
                                           type: "object",
-                                          description: "Error details",
                                           properties: {
-                                             issues: {
+                                             code: {
+                                                type: "string",
+                                                description: "Error code",
+                                                default: "too_small",
+                                             },
+                                             minimum: {
+                                                type: "integer",
+                                                description: "Minimum length (if applicable)",
+                                                default: 3,
+                                             },
+                                             type: {
+                                                type: "string",
+                                                description: "Data type",
+                                             },
+                                             inclusive: {
+                                                type: "boolean",
+                                                description: "Inclusive minimum (if applicable)",
+                                             },
+                                             exact: {
+                                                type: "boolean",
+                                                description: "Exact length required (if applicable)",
+                                             },
+                                             message: {
+                                                type: "string",
+                                                description: "Error message",
+                                                default: "Name must be at least 3 characters",
+                                             },
+                                             path: {
                                                 type: "array",
                                                 items: {
-                                                   type: "object",
-                                                   properties: {
-                                                      code: {
-                                                         type: "string",
-                                                         description: "Error code",
-                                                         default: "too_small",
-                                                      },
-                                                      minimum: {
-                                                         type: "integer",
-                                                         description: "Minimum length (if applicable)",
-                                                         default: 3,
-                                                      },
-                                                      type: {
-                                                         type: "string",
-                                                         description: "Data type",
-                                                      },
-                                                      inclusive: {
-                                                         type: "boolean",
-                                                         description: "Inclusive minimum (if applicable)",
-                                                      },
-                                                      exact: {
-                                                         type: "boolean",
-                                                         description: "Exact length required (if applicable)",
-                                                      },
-                                                      message: {
-                                                         type: "string",
-                                                         description: "Error message",
-                                                         default: "Name must be at least 3 characters",
-                                                      },
-                                                      path: {
-                                                         type: "array",
-                                                         items: {
-                                                            type: "string",
-                                                            example: "name",
-                                                         },
-                                                         description: "Path to the field with error",
-                                                      },
-                                                   },
+                                                   type: "string",
+                                                   example: "name",
                                                 },
-                                                description: "Array of specific issues with the error",
-                                             },
-                                             name: {
-                                                type: "string",
-                                                description: "Error name",
-                                                default: "ZodError",
+                                                description: "Path to the field with error",
                                              },
                                           },
                                        },
+                                       description: "Array of specific issues with the error",
+                                    },
+                                    name: {
+                                       type: "string",
+                                       description: "Error name",
+                                       default: "ZodError",
                                     },
                                  },
                               },
-                           ],
-                        },
-                        examples: {
-                           usernameExists: {
-                              summary: "User not found",
-                              value: {
-                                 success: false,
-                                 statusCode: 400,
-                                 message: "User not found",
-                              },
                            },
-                           validationError: {
-                              summary: "Validation error",
-                              value: {
-                                 success: false,
-                                 error: {
-                                    issues: [
-                                       {
-                                          code: "too_small",
-                                          minimum: 3,
-                                          type: "string",
-                                          inclusive: true,
-                                          exact: false,
-                                          message: "Name must be at least 3 characters",
-                                          path: ["name"],
-                                       },
-                                    ],
-                                    name: "ZodError",
-                                 },
+                        },
+                     },
+                  },
+               },
+               401: {
+                  description: "Incorrect password",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
                               },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 401,
+                              },
+                              message: { type: "string", default: "Incorrect password" },
+                           },
+                        },
+                     },
+                  },
+               },
+               404: {
+                  description: "User not found",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
+                              },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 404,
+                              },
+                              message: { type: "string", default: "User not found" },
                            },
                         },
                      },
@@ -277,6 +269,11 @@ export const openApiSpec = {
                               description: "Must be at least 3 characters",
                               example: "John Doe",
                            },
+                           password: {
+                              type: "string",
+                              description: "Must be at least 6 characters",
+                              example: "123456",
+                           },
                         },
                      },
                   },
@@ -327,126 +324,90 @@ export const openApiSpec = {
                      "application/json": {
                         schema: {
                            type: "object",
-                           oneOf: [
-                              {
-                                 properties: {
-                                    type: "object",
-                                    properties: {
-                                       success: {
-                                          type: "boolean",
-                                          description: "Success status",
-                                          default: false,
-                                       },
-                                       statusCode: {
-                                          type: "integer",
-                                          description: "Success status code",
-                                          default: 400,
-                                       },
-                                       message: {
-                                          type: "string",
-                                          description: "Error message",
-                                          default: "Username already exists",
-                                       },
-                                    },
-                                 },
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
                               },
-                              {
+                              error: {
+                                 type: "object",
+                                 description: "Error details",
                                  properties: {
-                                    type: "object",
-                                    properties: {
-                                       success: {
-                                          type: "boolean",
-                                          description: "Success status",
-                                          default: false,
-                                       },
-                                       error: {
+                                    issues: {
+                                       type: "array",
+                                       items: {
                                           type: "object",
-                                          description: "Error details",
                                           properties: {
-                                             issues: {
+                                             code: {
+                                                type: "string",
+                                                description: "Error code",
+                                                default: "too_small",
+                                             },
+                                             minimum: {
+                                                type: "integer",
+                                                description: "Minimum length (if applicable)",
+                                                default: 3,
+                                             },
+                                             type: {
+                                                type: "string",
+                                                description: "Data type",
+                                             },
+                                             inclusive: {
+                                                type: "boolean",
+                                                description: "Inclusive minimum (if applicable)",
+                                             },
+                                             exact: {
+                                                type: "boolean",
+                                                description: "Exact length required (if applicable)",
+                                             },
+                                             message: {
+                                                type: "string",
+                                                description: "Error message",
+                                                default: "Name must be at least 3 characters",
+                                             },
+                                             path: {
                                                 type: "array",
                                                 items: {
-                                                   type: "object",
-                                                   properties: {
-                                                      code: {
-                                                         type: "string",
-                                                         description: "Error code",
-                                                         default: "too_small",
-                                                      },
-                                                      minimum: {
-                                                         type: "integer",
-                                                         description: "Minimum length (if applicable)",
-                                                         default: 3,
-                                                      },
-                                                      type: {
-                                                         type: "string",
-                                                         description: "Data type",
-                                                      },
-                                                      inclusive: {
-                                                         type: "boolean",
-                                                         description: "Inclusive minimum (if applicable)",
-                                                      },
-                                                      exact: {
-                                                         type: "boolean",
-                                                         description: "Exact length required (if applicable)",
-                                                      },
-                                                      message: {
-                                                         type: "string",
-                                                         description: "Error message",
-                                                         default: "Name must be at least 3 characters",
-                                                      },
-                                                      path: {
-                                                         type: "array",
-                                                         items: {
-                                                            type: "string",
-                                                            example: "name",
-                                                         },
-                                                         description: "Path to the field with error",
-                                                      },
-                                                   },
+                                                   type: "string",
+                                                   example: "name",
                                                 },
-                                                description: "Array of specific issues with the error",
-                                             },
-                                             name: {
-                                                type: "string",
-                                                description: "Error name",
-                                                default: "ZodError",
+                                                description: "Path to the field with error",
                                              },
                                           },
                                        },
+                                       description: "Array of specific issues with the error",
+                                    },
+                                    name: {
+                                       type: "string",
+                                       description: "Error name",
+                                       default: "ZodError",
                                     },
                                  },
                               },
-                           ],
-                        },
-                        examples: {
-                           usernameExists: {
-                              summary: "Username already exists",
-                              value: {
-                                 success: false,
-                                 statusCode: 400,
-                                 message: "Username already exists",
-                              },
                            },
-                           validationError: {
-                              summary: "Validation error",
-                              value: {
-                                 success: false,
-                                 error: {
-                                    issues: [
-                                       {
-                                          code: "too_small",
-                                          minimum: 3,
-                                          type: "string",
-                                          inclusive: true,
-                                          exact: false,
-                                          message: "Name must be at least 3 characters",
-                                          path: ["name"],
-                                       },
-                                    ],
-                                    name: "ZodError",
-                                 },
+                        },
+                     },
+                  },
+               },
+               409: {
+                  description: "Username already exists",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
                               },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 409,
+                              },
+                              message: { type: "string", default: "Username already exists" },
                            },
                         },
                      },
