@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { hash, compare } from "bcrypt";
 
 import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
@@ -36,15 +37,12 @@ api.post(
 
       const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
       if (existingUsers.length == 0) {
-         console.log("disini kh");
-         // throw new HTTPException(404, { message: "User not found" });
-         return c.json({ success: false, statusCode: 404, message: "User not found" });
+         throw new HTTPException(404, { message: "User not found" });
       }
 
       const userDoc: User = existingUsers[0] as User;
 
-      const passwordMatch = await Bun.password.verify(password, userDoc.password);
-
+      const passwordMatch = await compare(password, userDoc.password);
       if (!passwordMatch) {
          throw new HTTPException(401, { message: "Incorrect password" });
       }
@@ -79,11 +77,7 @@ api.post(
          throw new HTTPException(400, { message: "Username already exists" });
       }
 
-      const hashedPassword = await Bun.password.hash(password, {
-         algorithm: "bcrypt",
-         cost: 4,
-      });
-
+      const hashedPassword = await hash(password, 10);
       const res = await addDocument("users", { username, name, password: hashedPassword });
 
       if (!res) {
@@ -134,14 +128,7 @@ api.get(
          .required(),
       (result, c) => {
          if (!result.success) {
-            return c.json(
-               {
-                  success: false,
-                  statusCode: 400,
-                  message: "Invalid param",
-               },
-               400
-            );
+            throw new HTTPException(400, { message: "Invalid param" });
          }
       }
    ),
