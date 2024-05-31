@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { hash, compare } from "bcrypt";
+import { hashSync, compareSync } from "bcrypt-edge";
 
 import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
@@ -42,7 +42,7 @@ api.post(
 
       const userDoc: User = existingUsers[0] as User;
 
-      const passwordMatch = await compare(password, userDoc.password);
+      const passwordMatch = compareSync(password, userDoc.password);
       if (!passwordMatch) {
          throw new HTTPException(401, { message: "Incorrect password" });
       }
@@ -77,7 +77,7 @@ api.post(
          throw new HTTPException(400, { message: "Username already exists" });
       }
 
-      const hashedPassword = await hash(password, 10);
+      const hashedPassword = hashSync(password, 10);
       const res = await addDocument("users", { username, name, password: hashedPassword });
 
       if (!res) {
