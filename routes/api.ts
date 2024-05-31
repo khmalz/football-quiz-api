@@ -34,7 +34,7 @@ api.post(
 
       const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
       if (existingUsers.length == 0) {
-         return c.json({ success: false, statusCode: 400, message: "User not found" }, 400);
+         return c.json({ success: false, statusCode: 404, message: "User not found" }, 404);
       }
 
       const userDoc: User = existingUsers[0] as User;
