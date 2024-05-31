@@ -39,6 +39,223 @@ export const openApiSpec = {
             },
          },
       },
+      "/api/users/get": {
+         post: {
+            summary: "Get user",
+            tags: ["Users"],
+            requestBody: {
+               required: true,
+               content: {
+                  "application/json": {
+                     schema: {
+                        type: "object",
+                        properties: {
+                           username: {
+                              type: "string",
+                              description: "Must be at least 3 characters",
+                              example: "John",
+                           },
+                        },
+                     },
+                  },
+               },
+            },
+            responses: {
+               200: {
+                  description: "User created",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                              },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 200,
+                              },
+                              data: {
+                                 type: "object",
+                                 properties: {
+                                    id: {
+                                       type: "string",
+                                       example: "123",
+                                    },
+                                    username: {
+                                       type: "string",
+                                       example: "John",
+                                    },
+                                    name: {
+                                       type: "string",
+                                       example: "John Doe",
+                                    },
+                                 },
+                              },
+                           },
+                        },
+                     },
+                  },
+               },
+               400: {
+                  description: "Bad request",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           oneOf: [
+                              {
+                                 properties: {
+                                    type: "object",
+                                    properties: {
+                                       success: {
+                                          type: "boolean",
+                                          description: "Success status",
+                                          default: false,
+                                       },
+                                       statusCode: {
+                                          type: "integer",
+                                          description: "Success status code",
+                                          default: 400,
+                                       },
+                                       message: {
+                                          type: "string",
+                                          description: "Error message",
+                                          default: "User not found",
+                                       },
+                                    },
+                                 },
+                              },
+                              {
+                                 properties: {
+                                    type: "object",
+                                    properties: {
+                                       success: {
+                                          type: "boolean",
+                                          description: "Success status",
+                                          default: false,
+                                       },
+                                       error: {
+                                          type: "object",
+                                          description: "Error details",
+                                          properties: {
+                                             issues: {
+                                                type: "array",
+                                                items: {
+                                                   type: "object",
+                                                   properties: {
+                                                      code: {
+                                                         type: "string",
+                                                         description: "Error code",
+                                                         default: "too_small",
+                                                      },
+                                                      minimum: {
+                                                         type: "integer",
+                                                         description: "Minimum length (if applicable)",
+                                                         default: 3,
+                                                      },
+                                                      type: {
+                                                         type: "string",
+                                                         description: "Data type",
+                                                      },
+                                                      inclusive: {
+                                                         type: "boolean",
+                                                         description: "Inclusive minimum (if applicable)",
+                                                      },
+                                                      exact: {
+                                                         type: "boolean",
+                                                         description: "Exact length required (if applicable)",
+                                                      },
+                                                      message: {
+                                                         type: "string",
+                                                         description: "Error message",
+                                                         default: "Name must be at least 3 characters",
+                                                      },
+                                                      path: {
+                                                         type: "array",
+                                                         items: {
+                                                            type: "string",
+                                                            example: "name",
+                                                         },
+                                                         description: "Path to the field with error",
+                                                      },
+                                                   },
+                                                },
+                                                description: "Array of specific issues with the error",
+                                             },
+                                             name: {
+                                                type: "string",
+                                                description: "Error name",
+                                                default: "ZodError",
+                                             },
+                                          },
+                                       },
+                                    },
+                                 },
+                              },
+                           ],
+                        },
+                        examples: {
+                           usernameExists: {
+                              summary: "User not found",
+                              value: {
+                                 success: false,
+                                 statusCode: 400,
+                                 message: "User not found",
+                              },
+                           },
+                           validationError: {
+                              summary: "Validation error",
+                              value: {
+                                 success: false,
+                                 error: {
+                                    issues: [
+                                       {
+                                          code: "too_small",
+                                          minimum: 3,
+                                          type: "string",
+                                          inclusive: true,
+                                          exact: false,
+                                          message: "Name must be at least 3 characters",
+                                          path: ["name"],
+                                       },
+                                    ],
+                                    name: "ZodError",
+                                 },
+                              },
+                           },
+                        },
+                     },
+                  },
+               },
+               500: {
+                  description: "Internal server error",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
+                              },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 500,
+                              },
+                              message: { type: "string", default: "Something went wrong" },
+                           },
+                        },
+                     },
+                  },
+               },
+            },
+         },
+      },
       "/api/users": {
          post: {
             summary: "Add user",
@@ -66,7 +283,7 @@ export const openApiSpec = {
                },
             },
             responses: {
-               200: {
+               201: {
                   description: "User created",
                   content: {
                      "application/json": {
@@ -80,7 +297,7 @@ export const openApiSpec = {
                               statusCode: {
                                  type: "integer",
                                  description: "Success status code",
-                                 default: 200,
+                                 default: 201,
                               },
                               data: {
                                  type: "object",

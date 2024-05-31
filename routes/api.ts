@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
+import { User } from "../data/interface/user";
 
 const api = new Hono({ strict: false });
 api.use("/*", cors());
@@ -17,6 +18,36 @@ api.get("/hello", c => {
    const { name } = c.req.query();
    return c.json({ data: `Hello, ${name || "World"}!` });
 });
+
+api.post(
+   "/users/get",
+   zValidator(
+      "json",
+      z
+         .object({
+            username: z.string({ message: "Username is required" }).min(3, { message: "Username must be at least 3 characters" }).max(10, { message: "Username must be less than 10 characters" }),
+         })
+         .required()
+   ),
+   async c => {
+      const { username } = c.req.valid("json");
+
+      const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
+      if (existingUsers.length < 0) {
+         return c.json({ success: false, statusCode: 400, message: "User not found" }, 400);
+      }
+
+      const userDoc: User = existingUsers[0] as User;
+
+      const user: User = {
+         id: userDoc.id,
+         username: userDoc.username,
+         name: userDoc.name,
+      };
+
+      return c.json({ success: true, statusCode: 200, data: user });
+   }
+);
 
 api.post(
    "/users",
@@ -43,7 +74,7 @@ api.post(
          throw new Error("Failed to add User");
       }
 
-      return c.json({ success: true, statusCode: 200, data: { id: res.id, username, name } });
+      return c.json({ success: true, statusCode: 201, data: { id: res.id, username, name } });
    }
 );
 
