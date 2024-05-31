@@ -5,10 +5,10 @@ export const errorHandler = async (err: HTTPException | Error, c: Context<any>) 
    console.error("Error occurred:", err);
 
    if (err instanceof HTTPException) {
-      return c.json({ status: false, statusCode: err.status, message: err.message });
+      return c.json({ status: false, statusCode: err.status, message: err.message }, err.status);
    }
 
-   return c.json({ status: false, statusCode: 500, message: err.message || "Internal Server Error" });
+   return c.json({ status: false, statusCode: 500, message: err.message || "Internal Server Error" }, 500);
 };
 
 export const errorMiddleware = async (c: Context<any>, next: () => Promise<any>) => {

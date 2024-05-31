@@ -6,6 +6,7 @@ import { z } from "zod";
 import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 import { User } from "../data/interface/user";
+import { HTTPException } from "hono/http-exception";
 
 const api = new Hono({ strict: false });
 api.use("/*", cors());
@@ -26,20 +27,29 @@ api.post(
       z
          .object({
             username: z.string({ message: "Username is required" }).min(3, { message: "Username must be at least 3 characters" }).max(10, { message: "Username must be less than 10 characters" }),
+            password: z.string({ message: "Password is required" }).min(6, { message: "Password must be at least 6 characters" }),
          })
          .required()
    ),
    async c => {
-      const { username } = c.req.valid("json");
+      const { username, password } = c.req.valid("json");
 
       const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
       if (existingUsers.length == 0) {
-         return c.json({ success: false, statusCode: 404, message: "User not found" }, 404);
+         console.log("disini kh");
+         // throw new HTTPException(404, { message: "User not found" });
+         return c.json({ success: false, statusCode: 404, message: "User not found" });
       }
 
       const userDoc: User = existingUsers[0] as User;
 
-      const user: User = {
+      const passwordMatch = await Bun.password.verify(password, userDoc.password);
+
+      if (!passwordMatch) {
+         throw new HTTPException(401, { message: "Incorrect password" });
+      }
+
+      const user = {
          id: userDoc.id,
          username: userDoc.username,
          name: userDoc.name,
@@ -57,18 +67,24 @@ api.post(
          .object({
             username: z.string({ message: "Username is required" }).min(3, { message: "Username must be at least 3 characters" }).max(10, { message: "Username must be less than 10 characters" }),
             name: z.string({ message: "Name is required" }).min(3, { message: "Name must be at least 3 characters" }).max(100, { message: "Name must be less than 100 characters" }),
+            password: z.string({ message: "Password is required" }).min(6, { message: "Password must be at least 6 characters" }),
          })
          .required()
    ),
    async c => {
-      const { username, name } = c.req.valid("json");
+      const { username, name, password } = c.req.valid("json");
 
       const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
       if (existingUsers.length > 0) {
-         return c.json({ success: false, statusCode: 400, message: "Username already exists" }, 400);
+         throw new HTTPException(400, { message: "Username already exists" });
       }
 
-      const res = await addDocument("users", { username, name });
+      const hashedPassword = await Bun.password.hash(password, {
+         algorithm: "bcrypt",
+         cost: 4,
+      });
+
+      const res = await addDocument("users", { username, name, password: hashedPassword });
 
       if (!res) {
          throw new Error("Failed to add User");
