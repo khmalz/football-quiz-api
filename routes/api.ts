@@ -33,7 +33,7 @@ api.post(
       const { username } = c.req.valid("json");
 
       const existingUsers = await retrieveDataByFields("users", [{ field: "username", value: username }]);
-      if (existingUsers.length < 0) {
+      if (existingUsers.length == 0) {
          return c.json({ success: false, statusCode: 400, message: "User not found" }, 400);
       }
 
