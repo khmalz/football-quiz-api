@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { hashSync, compareSync } from "bcrypt-edge";
 
-import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId } from "../lib/firestore/service";
+import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId, retrieveThirdDocByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 import { User } from "../data/interface/user";
 import { HTTPException } from "hono/http-exception";
@@ -91,6 +91,30 @@ api.post(
 const validCategories = ["championsleague", "premierleague", "laliga"] as const;
 
 api.post(
+   "/score/get",
+   zValidator(
+      "json",
+      z
+         .object({
+            id: z.string({ message: "Id is required" }).min(3, { message: "Id must be at least 3 characters" }),
+            category: z.enum(validCategories, { message: "Category must be one of the league" }),
+         })
+         .required()
+   ),
+   async c => {
+      const { id, category } = c.req.valid("json");
+
+      const res = await retrieveThirdDocByDocId("users", id, "scores", category);
+
+      if (!res) {
+         throw new HTTPException(404, { message: "Document not found" });
+      }
+
+      return c.json({ success: true, statusCode: 200, data: res }, 200);
+   }
+);
+
+api.post(
    "/score",
    zValidator(
       "json",
@@ -98,7 +122,7 @@ api.post(
          .object({
             id: z.string({ message: "Id is required" }).min(3, { message: "Id must be at least 3 characters" }),
             category: z.enum(validCategories, { message: "Category must be one of the league" }),
-            level: z.string({ message: "level name is required" }).min(1, { message: "level name must be at least 1 character" }),
+            level: z.number({ message: "Level is required" }).min(1, { message: "Level must be at least 1" }),
             score: z.number({ message: "Score is required" }).min(0, { message: "Score must be at least 0" }).max(100, { message: "Score must be at most 100" }),
          })
          .required()
@@ -106,13 +130,42 @@ api.post(
    async c => {
       try {
          const { id, category, level, score } = c.req.valid("json");
-         const data = { [level]: score };
 
+         // Retrieve the existing document
+         const existingDoc: any = await retrieveThirdDocByDocId("users", id, "scores", category);
+
+         let data;
+         if (existingDoc) {
+            const currentLevel = existingDoc.current_level;
+            const newLevel = currentLevel + 1;
+
+            if (level <= currentLevel) {
+               // User is repeating the level, update only if new score is higher
+               const theScore = existingDoc[`level${level}`];
+               if (theScore !== undefined) {
+                  data = { [`level${level}`]: score > theScore ? score : theScore };
+               }
+            } else if (level === newLevel) {
+               // User is progressing to the next level
+               data = { [`level${level}`]: score, current_level: newLevel };
+            } else {
+               // Invalid level progression (query injection)
+               throw new HTTPException(406, { message: "Invalid level progression" });
+            }
+         } else {
+            // Document does not exist, create new document with level1 and current_level 1
+            if (level !== 1) {
+               throw new HTTPException(400, { message: "Invalid initial level" });
+            }
+            data = { level1: score, current_level: 1 };
+         }
+
+         // Add or update the document in sub-collection
          await addDocumentToSubCollectionWithFixedId("users", id, "scores", category, data);
 
-         return c.json({ success: true, statusCode: 201, data: { id_user: id, category, level, score } }, 201);
+         return c.json({ success: true, statusCode: 201, data: { id_user: id, category, ...data } }, 201);
       } catch (error: any) {
-         throw error.message;
+         throw new HTTPException(error.statusCode, { message: error.message });
       }
    }
 );

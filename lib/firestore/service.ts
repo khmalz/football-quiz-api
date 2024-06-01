@@ -114,6 +114,22 @@ export async function retrieveDataWithSub(collectionName: string, subCollectionN
    return data;
 }
 
+export async function retrieveThirdDocByDocId(collectionName: string, docId: string, subCollectionName: string, thirdDocId: string) {
+   const subCollectionRef = collection(doc(firestore, collectionName, docId), subCollectionName);
+   const docRef = doc(subCollectionRef, thirdDocId);
+   const docSnap = await getDoc(docRef);
+
+   if (!docSnap.exists()) {
+      return null;
+   }
+
+   const docData = docSnap.data();
+   return {
+      id: docSnap.id,
+      ...docData,
+   };
+}
+
 export async function addDocument(collectionName: string, data: any) {
    data.created_at = new Date().toISOString();
    data.updated_at = new Date().toISOString();
