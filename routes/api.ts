@@ -84,7 +84,7 @@ api.post(
          throw new Error("Failed to add User");
       }
 
-      return c.json({ success: true, statusCode: 201, data: { id: res.id, username, name } });
+      return c.json({ success: true, statusCode: 201, data: { id: res.id, username, name } }, 201);
    }
 );
 
@@ -110,7 +110,7 @@ api.post(
 
          await addDocumentToSubCollectionWithFixedId("users", id, "scores", category, data);
 
-         return c.json({ success: true, statusCode: 200, data: { id_user: id, category, level, score } });
+         return c.json({ success: true, statusCode: 201, data: { id_user: id, category, level, score } }, 201);
       } catch (error: any) {
          throw error.message;
       }
