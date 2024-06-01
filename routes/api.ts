@@ -102,15 +102,17 @@ api.post(
          .required()
    ),
    async c => {
-      const { id, category } = c.req.valid("json");
+      const body = c.req.valid("json");
 
-      const res = await retrieveThirdDocByDocId("users", id, "scores", category);
+      let res = await retrieveThirdDocByDocId("users", body.id, "scores", body.category);
 
       if (!res) {
-         throw new HTTPException(404, { message: "Document not found" });
+         throw new HTTPException(404, { message: "The document of the category not found" });
       }
 
-      return c.json({ success: true, statusCode: 200, data: res }, 200);
+      const { id, ...resWithoutId } = res;
+
+      return c.json({ success: true, statusCode: 200, data: { id_user: body.id, category: body.category, ...resWithoutId } }, 200);
    }
 );
 
@@ -155,7 +157,7 @@ api.post(
          } else {
             // Document does not exist, create new document with level1 and current_level 1
             if (level !== 1) {
-               throw new HTTPException(400, { message: "Invalid initial level" });
+               throw new HTTPException(409, { message: "Invalid initial level" });
             }
             data = { level1: score, current_level: 1 };
          }
@@ -165,7 +167,7 @@ api.post(
 
          return c.json({ success: true, statusCode: 201, data: { id_user: id, category, ...data } }, 201);
       } catch (error: any) {
-         throw new HTTPException(error.statusCode, { message: error.message });
+         throw new HTTPException(500, { message: error.message });
       }
    }
 );

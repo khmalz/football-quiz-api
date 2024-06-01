@@ -2,8 +2,6 @@ import { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 export const errorHandler = async (err: HTTPException | Error, c: Context<any>) => {
-   console.error("Error occurred:", err);
-
    if (err instanceof HTTPException) {
       return c.json({ status: false, statusCode: err.status, message: err.message }, err.status);
    }
