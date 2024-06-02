@@ -497,9 +497,18 @@ export const openApiSpec = {
                                        type: "string",
                                        example: "championsleague",
                                     },
-                                    level1: {
-                                       type: "number",
-                                       example: 80,
+                                    level: {
+                                       type: "object",
+                                       properties: {
+                                          1: {
+                                             type: "number",
+                                             example: 80,
+                                          },
+                                          2: {
+                                             type: "number",
+                                             example: 80,
+                                          },
+                                       },
                                     },
                                  },
                               },

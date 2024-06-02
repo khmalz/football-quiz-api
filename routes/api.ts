@@ -130,45 +130,49 @@ api.post(
          .required()
    ),
    async c => {
-      try {
-         const { id, category, level, score } = c.req.valid("json");
+      const { id, category, level, score } = c.req.valid("json");
 
-         // Retrieve the existing document
-         const existingDoc: any = await retrieveThirdDocByDocId("users", id, "scores", category);
+      // Retrieve the existing document
+      const existingDoc: any = await retrieveThirdDocByDocId("users", id, "scores", category);
 
-         let data;
-         if (existingDoc) {
-            const currentLevel = existingDoc.current_level;
-            const newLevel = currentLevel + 1;
+      let data: any = {};
+      let responseData: any = {};
+      if (existingDoc) {
+         const currentLevel = existingDoc.current_level;
+         const newLevel = currentLevel + 1;
 
-            if (level <= currentLevel) {
-               // User is repeating the level, update only if new score is higher
-               const theScore = existingDoc[`level${level}`];
-               if (theScore !== undefined) {
-                  data = { [`level${level}`]: score > theScore ? score : theScore };
-               }
-            } else if (level === newLevel) {
-               // User is progressing to the next level
-               data = { [`level${level}`]: score, current_level: newLevel };
+         if (level <= currentLevel) {
+            // User is repeating the level, update only if new score is higher
+            const theScore = existingDoc.level?.[level];
+            if (theScore !== undefined) {
+               data = { [`level.${level}`]: score > theScore ? score : theScore };
+               responseData = { [`level${level}`]: score > theScore ? score : theScore };
             } else {
-               // Invalid level progression (query injection)
-               throw new HTTPException(406, { message: "Invalid level progression" });
+               // if the score doesn't exist for the level (happens if there is an error for currentLevel)
+               data = { [`level.${level}`]: score };
+               responseData = { [`level${level}`]: score };
             }
+         } else if (level === newLevel) {
+            // User is progressing to the next level
+            data = { [`level.${level}`]: score, current_level: newLevel };
+            responseData = { [`level${level}`]: score, current_level: newLevel };
          } else {
-            // Document does not exist, create new document with level1 and current_level 1
-            if (level !== 1) {
-               throw new HTTPException(409, { message: "Invalid initial level" });
-            }
-            data = { level1: score, current_level: 1 };
+            // Invalid level progression (query injection)
+            throw new HTTPException(406, { message: "Invalid level progression" });
          }
-
-         // Add or update the document in sub-collection
-         await addDocumentToSubCollectionWithFixedId("users", id, "scores", category, data);
-
-         return c.json({ success: true, statusCode: 201, data: { id_user: id, category, ...data } }, 201);
-      } catch (error: any) {
-         throw new HTTPException(500, { message: error.message });
+      } else {
+         // Document does not exist, create new document with level 1 and current_level 1
+         if (level !== 1) {
+            throw new HTTPException(409, { message: "Invalid initial level" });
+         }
+         data = { level: { 1: score }, current_level: 1 };
+         responseData = { level1: score, current_level: 1 };
       }
+
+      // Add or update the document in sub-collection
+      await addDocumentToSubCollectionWithFixedId("users", id, "scores", category, data);
+
+      return c.json({ success: true, statusCode: 201, data: { id_user: id, category, ...responseData } }, 201);
    }
 );
 
