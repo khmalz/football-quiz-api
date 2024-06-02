@@ -20,7 +20,7 @@ export async function retrieveDataByDocId(collectionName: string, docId: string)
    return data;
 }
 
-export async function retrieveDataByFields(collectionName: string, conditions: { field: string; operator?: WhereFilterOp; value: string }[]) {
+export async function retrieveDataByFields(collectionName: string, conditions: { field: string; operator?: WhereFilterOp; value: string | number | boolean }[]) {
    let q = query(collection(firestore, collectionName));
 
    conditions.forEach(condition => {
@@ -37,7 +37,7 @@ export async function retrieveDataByFields(collectionName: string, conditions: {
    return data;
 }
 
-export async function retrieveDataSubByFields(mainCollectionName: string, subCollectionName: string, conditions: { field: string; operator?: WhereFilterOp; value: string }[]) {
+export async function retrieveDataSubByFields(mainCollectionName: string, subCollectionName: string, conditions: { field: string; operator?: WhereFilterOp; value: string | number | boolean }[]) {
    const data: Record<string, any>[] = [];
 
    const mainCollectionSnapshot = await getDocs(collection(firestore, mainCollectionName));
@@ -60,6 +60,31 @@ export async function retrieveDataSubByFields(mainCollectionName: string, subCol
          });
       });
    }
+
+   return data;
+}
+
+export async function retrieveDataSubByFieldsByDocId(mainCollectionName: string, docId: string, subCollectionName: string, conditions: { field: string; operator?: WhereFilterOp; value: string | number | boolean }[]) {
+   const data: Record<string, any>[] = [];
+
+   const mainDocRef = doc(firestore, mainCollectionName, docId);
+   const subCollectionRef = collection(mainDocRef, subCollectionName);
+   let q = query(subCollectionRef);
+
+   conditions.forEach(condition => {
+      const { field, operator = "==", value } = condition;
+      q = query(q, where(field, operator, value));
+   });
+
+   const subCollectionSnapshot = await getDocs(q);
+
+   subCollectionSnapshot.forEach(doc => {
+      data.push({
+         mainDocId: docId,
+         subDocId: doc.id,
+         ...doc.data(),
+      });
+   });
 
    return data;
 }
@@ -158,6 +183,17 @@ export async function addManyDocuments(collectionName: string, dataArray: any[])
          console.error("Error adding documents to collection:", error);
          throw error;
       });
+}
+
+export async function addFieldToDoc(collectionName: string, docId: string, data: Record<string, any>) {
+   const docRef = doc(firestore, collectionName, docId);
+   const docSnap = await getDoc(docRef);
+
+   if (docSnap.exists()) {
+      await updateDoc(docRef, data);
+   } else {
+      await setDoc(docRef, data);
+   }
 }
 
 export async function addDocumentToSubCollection(collectionName: string, docId: string, subCollectionName: string, data: any) {

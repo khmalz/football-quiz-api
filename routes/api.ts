@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { hashSync, compareSync } from "bcrypt-edge";
 
-import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId, retrieveThirdDocByDocId } from "../lib/firestore/service";
+import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId, retrieveDataSubByFieldsByDocId, retrieveThirdDocByDocId } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 import { User } from "../data/interface/user";
-import { HTTPException } from "hono/http-exception";
 
 const api = new Hono({ strict: false });
 api.use("/*", cors());
@@ -200,6 +200,34 @@ api.get(
          success: true,
          statusCode: 200,
          data: { type: category, questions },
+      });
+   }
+);
+
+api.get(
+   "/questions/category/:category/level/:level",
+   zValidator(
+      "param",
+      z
+         .object({
+            category: z.enum(validCategories, { message: "Category must be one of the league" }),
+            level: z.string({ message: "Level must be a string" }).min(1, { message: "Level must be at least 1" }).regex(/^\d+$/, { message: "Level must contain only digits" }),
+         })
+         .required()
+   ),
+   async c => {
+      const { category, level } = c.req.valid("param");
+
+      const questions = await retrieveDataSubByFieldsByDocId("categories", category, "questions", [{ field: "level", value: +level }]);
+
+      if (questions.length === 0) {
+         throw new HTTPException(404, { message: "Questions not found" });
+      }
+
+      return c.json({
+         success: true,
+         statusCode: 200,
+         data: { type: category, length: questions.length, level: +level, questions },
       });
    }
 );
