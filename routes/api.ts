@@ -196,10 +196,16 @@ api.get(
 
       const questions = await retrieveDataSubByDocId("categories", category, "questions");
 
+      if (questions.length === 0) {
+         throw new HTTPException(404, { message: "Questions not found" });
+      }
+
+      const filteredQuestions = questions.map(({ id, ...rest }: any) => rest);
+
       return c.json({
          success: true,
          statusCode: 200,
-         data: { type: category, questions },
+         data: { type: category, questions: filteredQuestions },
       });
    }
 );
@@ -224,10 +230,12 @@ api.get(
          throw new HTTPException(404, { message: "Questions not found" });
       }
 
+      const filteredQuestions = questions.map(({ mainDocId, subDocId, ...rest }: any) => rest);
+
       return c.json({
          success: true,
          statusCode: 200,
-         data: { type: category, length: questions.length, level: +level, questions },
+         data: { type: category, length: questions.length, level: +level, questions: filteredQuestions },
       });
    }
 );
