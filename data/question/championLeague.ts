@@ -64,7 +64,7 @@ export const championsLeagueDataL2 = [
    },
    {
       level: 2,
-      question: "Which player scored a hat-trick in the 2018 UEFA Champions League final?",
+      question: "Which player scored a brace in the 2018 UEFA Champions League final?",
       options: ["Cristiano Ronaldo", "Mohamed Salah", "Gareth Bale", "Karim Benzema"],
       answer: "Gareth Bale",
    },

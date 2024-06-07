@@ -15,9 +15,10 @@ export async function retrieveData(collectionName: string) {
 }
 
 export async function retrieveDataByDocId(collectionName: string, docId: string) {
-   const snapshot = await getDoc(doc(firestore, collectionName, docId));
-   const data = snapshot.data();
-   return data;
+   const docRef = doc(firestore, collectionName, docId);
+   const docSnap = await getDoc(docRef);
+
+   return docSnap.data();
 }
 
 export async function retrieveDataByFields(collectionName: string, conditions: { field: string; operator?: WhereFilterOp; value: string | number | boolean }[]) {
@@ -160,6 +161,13 @@ export async function addDocument(collectionName: string, data: any) {
    data.updated_at = new Date().toISOString();
 
    return await addDoc(collection(firestore, collectionName), data);
+}
+
+export async function updateDocument(collectionName: string, docId: string, data: Record<string, any>) {
+   data.updated_at = new Date().toISOString();
+
+   const docRef = doc(firestore, collectionName, docId);
+   await updateDoc(docRef, data);
 }
 
 export async function addManyDocuments(collectionName: string, dataArray: any[]) {

@@ -5,7 +5,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { hashSync, compareSync } from "bcrypt-edge";
 
-import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByFields, retrieveDataSubByDocId, retrieveDataSubByFieldsByDocId, retrieveThirdDocByDocId } from "../lib/firestore/service";
+import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByDocId, retrieveDataByFields, retrieveDataSubByDocId, retrieveDataSubByFieldsByDocId, retrieveThirdDocByDocId, updateDocument } from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 import { User } from "../data/interface/user";
 
@@ -54,6 +54,66 @@ api.post(
       };
 
       return c.json({ success: true, statusCode: 200, data: user });
+   }
+);
+
+api.put(
+   "/users/edit",
+   zValidator(
+      "json",
+      z
+         .object({
+            id: z.string({ message: "Id is required" }).min(3, { message: "Id must be at least 3 characters" }).max(30, { message: "Id must be less than 30 characters" }),
+            username: z.string({ message: "Username is required" }).min(3, { message: "Username must be at least 3 characters" }).max(10, { message: "Username must be less than 10 characters" }),
+            name: z.string({ message: "Name is required" }).min(3, { message: "Name must be at least 3 characters" }).max(100, { message: "Name must be less than 100 characters" }),
+         })
+         .required()
+   ),
+   async c => {
+      const { id, username, name } = c.req.valid("json");
+
+      const existingUsers = await retrieveDataByDocId("users", id);
+      if (!existingUsers || existingUsers.length === 0) {
+         throw new HTTPException(404, { message: "User not found" });
+      }
+
+      await updateDocument("users", id, { username, name });
+
+      return c.json({ success: true, statusCode: 201, data: { id, username, name } }, 201);
+   }
+);
+
+api.put(
+   "/users/changepassword",
+   zValidator(
+      "json",
+      z
+         .object({
+            id: z.string({ message: "Id is required" }).min(3, { message: "Id must be at least 3 characters" }).max(30, { message: "Id must be less than 30 characters" }),
+            oldPassword: z.string({ message: "Old Password is required" }).min(6, { message: "Old Password must be at least 6 characters" }),
+            newPassword: z.string({ message: "New Password is required" }).min(6, { message: "New Password must be at least 6 characters" }),
+         })
+         .required()
+   ),
+   async c => {
+      const { id, oldPassword, newPassword } = c.req.valid("json");
+
+      const existingUsers = await retrieveDataByDocId("users", id);
+      if (!existingUsers || existingUsers.length === 0) {
+         throw new HTTPException(404, { message: "User not found" });
+      }
+
+      const userDoc: User = existingUsers as User;
+
+      const passwordMatch = compareSync(oldPassword, userDoc.password);
+      if (!passwordMatch) {
+         throw new HTTPException(401, { message: "Incorrect password" });
+      }
+
+      const hashedPassword = hashSync(newPassword, 10);
+      await updateDocument("users", id, { password: hashedPassword });
+
+      return c.json({ success: true, statusCode: 201, data: { id, username: userDoc.username, name: userDoc.name } }, 201);
    }
 );
 
