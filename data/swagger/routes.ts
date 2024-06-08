@@ -902,16 +902,42 @@ export const openApiSpec = {
                                        type: "string",
                                        example: "championsleague",
                                     },
-                                    level: {
+                                    levels: {
                                        type: "object",
                                        properties: {
                                           1: {
-                                             type: "number",
-                                             example: 80,
+                                             type: "object",
+                                             properties: {
+                                                score: {
+                                                   type: "number",
+                                                   example: 100,
+                                                },
+                                                created_at: {
+                                                   type: "string",
+                                                   example: "2024-01-01T00:00:00.000Z",
+                                                },
+                                                updated_at: {
+                                                   type: "string",
+                                                   example: "2024-01-01T00:00:00.000Z",
+                                                },
+                                             },
                                           },
                                           2: {
-                                             type: "number",
-                                             example: 80,
+                                             type: "object",
+                                             properties: {
+                                                score: {
+                                                   type: "number",
+                                                   example: 100,
+                                                },
+                                                created_at: {
+                                                   type: "string",
+                                                   example: "2024-01-01T00:00:00.000Z",
+                                                },
+                                                updated_at: {
+                                                   type: "string",
+                                                   example: "2024-01-01T00:00:00.000Z",
+                                                },
+                                             },
                                           },
                                        },
                                     },
@@ -1114,6 +1140,14 @@ export const openApiSpec = {
                                     current_level: {
                                        type: "number",
                                        example: 1,
+                                    },
+                                    created_at: {
+                                       type: "string",
+                                       example: "2024-01-01T00:00:00.000Z",
+                                    },
+                                    updated_at: {
+                                       type: "string",
+                                       example: "2024-01-01T00:00:00.000Z",
                                     },
                                  },
                               },

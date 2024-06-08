@@ -197,25 +197,30 @@ api.post(
 
       let data: any = {};
       let responseData: any = {};
+      const currentDate = new Date().toISOString();
+
       if (existingDoc) {
          const currentLevel = existingDoc.current_level;
          const newLevel = currentLevel + 1;
 
          if (level <= currentLevel) {
             // User is repeating the level, update only if new score is higher
-            const theScore = existingDoc.level?.[level];
-            if (theScore !== undefined) {
-               data = { [`level.${level}`]: score > theScore ? score : theScore };
-               responseData = { [`level${level}`]: score > theScore ? score : theScore };
+            const existingLevelData = existingDoc.levels?.[level];
+            if (existingLevelData) {
+               if (score > existingLevelData.score) {
+                  data = { [`levels.${level}`]: { score, created_at: existingLevelData.created_at, updated_at: currentDate } };
+                  responseData = { [`level${level}`]: score, created_at: existingLevelData.created_at, updated_at: currentDate };
+               } else {
+                  responseData = { [`level${level}`]: existingLevelData.score, created_at: existingLevelData.created_at, updated_at: existingLevelData.updated_at }; // Return existing data if the new score is not higher
+               }
             } else {
-               // if the score doesn't exist for the level (happens if there is an error for currentLevel)
-               data = { [`level.${level}`]: score };
-               responseData = { [`level${level}`]: score };
+               data = { [`levels.${level}`]: { score, created_at: currentDate, updated_at: currentDate } };
+               responseData = { [`level${level}`]: score, created_at: currentDate, updated_at: currentDate };
             }
          } else if (level === newLevel) {
             // User is progressing to the next level
-            data = { [`level.${level}`]: score, current_level: newLevel };
-            responseData = { [`level${level}`]: score, current_level: newLevel };
+            data = { [`levels.${level}`]: { score, created_at: currentDate, updated_at: currentDate }, current_level: newLevel };
+            responseData = { [`level${level}`]: score, created_at: currentDate, updated_at: currentDate, current_level: newLevel };
          } else {
             // Invalid level progression (query injection)
             throw new HTTPException(406, { message: "Invalid level progression" });
@@ -225,8 +230,8 @@ api.post(
          if (level !== 1) {
             throw new HTTPException(409, { message: "Invalid initial level" });
          }
-         data = { level: { 1: score }, current_level: 1 };
-         responseData = { level1: score, current_level: 1 };
+         data = { levels: { 1: { score, created_at: currentDate, updated_at: currentDate } }, current_level: 1 };
+         responseData = { [`level${level}`]: score, created_at: currentDate, updated_at: currentDate, current_level: 1 };
       }
 
       // Add or update the document in sub-collection
