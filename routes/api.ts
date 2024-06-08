@@ -218,6 +218,10 @@ api.post(
                responseData = { [`level${level}`]: score, created_at: currentDate, updated_at: currentDate };
             }
          } else if (level === newLevel) {
+            if (score < 50) {
+               throw new HTTPException(422, { message: "Score must be at least 50" });
+            }
+
             // User is progressing to the next level
             data = { [`levels.${level}`]: { score, created_at: currentDate, updated_at: currentDate }, current_level: newLevel };
             responseData = { [`level${level}`]: score, created_at: currentDate, updated_at: currentDate, current_level: newLevel };
@@ -229,6 +233,10 @@ api.post(
          // Document does not exist, create new document with level 1 and current_level 1
          if (level !== 1) {
             throw new HTTPException(409, { message: "Invalid initial level" });
+         }
+
+         if (score < 50) {
+            throw new HTTPException(422, { message: "Score must be at least 50" });
          }
          data = { levels: { 1: { score, created_at: currentDate, updated_at: currentDate } }, current_level: 1 };
          responseData = { [`level${level}`]: score, created_at: currentDate, updated_at: currentDate, current_level: 1 };

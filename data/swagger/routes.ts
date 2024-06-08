@@ -1267,6 +1267,29 @@ export const openApiSpec = {
                      },
                   },
                },
+               422: {
+                  description: "Score not reach the minimum",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
+                              },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 422,
+                              },
+                              message: { type: "string", default: "Score must be at least 50" },
+                           },
+                        },
+                     },
+                  },
+               },
                500: {
                   description: "Internal server error",
                   content: {
