@@ -1316,6 +1316,314 @@ export const openApiSpec = {
             },
          },
       },
+      "/api/scores/get/{category}": {
+         get: {
+            summary: "List user scores by category",
+            tags: ["Users"],
+            parameters: [
+               {
+                  name: "category",
+                  in: "path",
+                  required: true,
+                  description: "Available values: championsleague, premierleague, laliga",
+                  example: "championsleague",
+               },
+               {
+                  name: "sum",
+                  in: "query",
+                  description: "Is score sum or not",
+                  example: "true",
+               },
+            ],
+            responses: {
+               200: {
+                  description: "Score response",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           oneOf: [
+                              {
+                                 type: "object",
+                                 properties: {
+                                    success: {
+                                       type: "boolean",
+                                       description: "Success status",
+                                    },
+                                    statusCode: {
+                                       type: "integer",
+                                       description: "Success status code",
+                                       default: 200,
+                                    },
+                                    data: {
+                                       type: "array",
+                                       items: {
+                                          type: "object",
+                                          properties: {
+                                             username: {
+                                                type: "string",
+                                             },
+                                             name: {
+                                                type: "string",
+                                             },
+                                             scores: {
+                                                type: "object",
+                                                properties: {
+                                                   category: {
+                                                      type: "string",
+                                                   },
+                                                   levels: {
+                                                      type: "object",
+                                                      properties: {
+                                                         "1": {
+                                                            type: "object",
+                                                            properties: {
+                                                               score: {
+                                                                  type: "number",
+                                                                  default: 100,
+                                                               },
+                                                               created_at: {
+                                                                  type: "string",
+                                                                  example: "2024-01-01T00:00:00.000Z",
+                                                               },
+                                                               updated_at: {
+                                                                  type: "string",
+                                                                  example: "2024-01-01T00:00:00.000Z",
+                                                               },
+                                                            },
+                                                         },
+                                                         "2": {
+                                                            type: "object",
+                                                            properties: {
+                                                               score: {
+                                                                  type: "number",
+                                                                  default: 100,
+                                                               },
+                                                               created_at: {
+                                                                  type: "string",
+                                                                  example: "2024-01-01T00:00:00.000Z",
+                                                               },
+                                                               updated_at: {
+                                                                  type: "string",
+                                                                  example: "2024-01-01T00:00:00.000Z",
+                                                               },
+                                                            },
+                                                         },
+                                                      },
+                                                   },
+                                                },
+                                             },
+                                          },
+                                       },
+                                    },
+                                 },
+                              },
+                              {
+                                 type: "object",
+                                 properties: {
+                                    success: {
+                                       type: "boolean",
+                                       description: "Success status",
+                                    },
+                                    statusCode: {
+                                       type: "integer",
+                                       description: "Success status code",
+                                       default: 200,
+                                    },
+                                    data: {
+                                       type: "array",
+                                       items: {
+                                          type: "object",
+                                          properties: {
+                                             username: {
+                                                type: "string",
+                                             },
+                                             name: {
+                                                type: "string",
+                                             },
+                                             scores: {
+                                                type: "object",
+                                                properties: {
+                                                   category: {
+                                                      type: "string",
+                                                   },
+                                                   total: {
+                                                      type: "number",
+                                                   },
+                                                },
+                                             },
+                                          },
+                                       },
+                                    },
+                                 },
+                              },
+                           ],
+                        },
+                        examples: {
+                           example1: {
+                              summary: "Default if sum is false or not defined",
+                              value: {
+                                 success: true,
+                                 statusCode: 200,
+                                 data: [
+                                    {
+                                       username: "john_doe",
+                                       name: "John Doe",
+                                       scores: {
+                                          category: "championsleague",
+                                          levels: {
+                                             "1": {
+                                                score: 100,
+                                                created_at: "2024-01-01T00:00:00.000Z",
+                                                updated_at: "2024-01-01T00:00:00.000Z",
+                                             },
+                                             "2": {
+                                                score: 95,
+                                                created_at: "2024-01-02T00:00:00.000Z",
+                                                updated_at: "2024-01-02T00:00:00.000Z",
+                                             },
+                                          },
+                                       },
+                                    },
+                                 ],
+                              },
+                           },
+                           example2: {
+                              summary: "Example if sum is true",
+                              value: {
+                                 success: true,
+                                 statusCode: 200,
+                                 data: [
+                                    {
+                                       username: "john_doe",
+                                       name: "John Doe",
+                                       scores: {
+                                          category: "championsleague",
+                                          total: 195,
+                                       },
+                                       answer: "Correct",
+                                       level: 2,
+                                    },
+                                 ],
+                              },
+                           },
+                        },
+                     },
+                  },
+               },
+               400: {
+                  description: "Bad request",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
+                              },
+                              error: {
+                                 type: "object",
+                                 description: "Error details",
+                                 properties: {
+                                    issues: {
+                                       type: "array",
+                                       items: {
+                                          type: "object",
+                                          properties: {
+                                             received: {
+                                                type: "string",
+                                                description: "Received data type",
+                                                default: "string",
+                                             },
+                                             code: {
+                                                type: "string",
+                                                description: "Error code",
+                                                default: "invalid_enum_value",
+                                             },
+                                             options: {
+                                                type: "array",
+                                                default: ["championsleague", "premierleague", "laliga"],
+                                                description: "Available values: championsleague, premierleague, laliga",
+                                             },
+                                             path: {
+                                                type: "array",
+                                                items: {
+                                                   type: "string",
+                                                   example: "category",
+                                                },
+                                                description: "Path to the field with error",
+                                             },
+                                             message: {
+                                                type: "string",
+                                                description: "Error message",
+                                                default: "Category must be one of the league",
+                                             },
+                                          },
+                                       },
+                                       description: "Array of specific issues with the error",
+                                    },
+                                    name: {
+                                       type: "string",
+                                       description: "Error name",
+                                       default: "ZodError",
+                                    },
+                                 },
+                              },
+                           },
+                        },
+                     },
+                  },
+               },
+               404: {
+                  description: "Not found",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
+                              },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 404,
+                              },
+                              message: { type: "string", default: "The document of the category not found" },
+                           },
+                        },
+                     },
+                  },
+               },
+               500: {
+                  description: "Internal server error",
+                  content: {
+                     "application/json": {
+                        schema: {
+                           type: "object",
+                           properties: {
+                              success: {
+                                 type: "boolean",
+                                 description: "Success status",
+                                 default: false,
+                              },
+                              statusCode: {
+                                 type: "integer",
+                                 description: "Success status code",
+                                 default: 500,
+                              },
+                              message: { type: "string", default: "Something went wrong" },
+                           },
+                        },
+                     },
+                  },
+               },
+            },
+         },
+      },
       "/api/questions/category/{category}": {
          get: {
             summary: "List questions by category",
@@ -1373,7 +1681,7 @@ export const openApiSpec = {
                   },
                },
                400: {
-                  description: "Invalid category",
+                  description: "Bad request",
                   content: {
                      "application/json": {
                         schema: {
@@ -1384,12 +1692,54 @@ export const openApiSpec = {
                                  description: "Success status",
                                  default: false,
                               },
-                              statusCode: {
-                                 type: "integer",
-                                 description: "Success status code",
-                                 default: 400,
+                              error: {
+                                 type: "object",
+                                 description: "Error details",
+                                 properties: {
+                                    issues: {
+                                       type: "array",
+                                       items: {
+                                          type: "object",
+                                          properties: {
+                                             received: {
+                                                type: "string",
+                                                description: "Received data type",
+                                                default: "string",
+                                             },
+                                             code: {
+                                                type: "string",
+                                                description: "Error code",
+                                                default: "invalid_enum_value",
+                                             },
+                                             options: {
+                                                type: "array",
+                                                default: ["championsleague", "premierleague", "laliga"],
+                                                description: "Available values: championsleague, premierleague, laliga",
+                                             },
+                                             path: {
+                                                type: "array",
+                                                items: {
+                                                   type: "string",
+                                                   example: "category",
+                                                },
+                                                description: "Path to the field with error",
+                                             },
+                                             message: {
+                                                type: "string",
+                                                description: "Error message",
+                                                default: "Category must be one of the league",
+                                             },
+                                          },
+                                       },
+                                       description: "Array of specific issues with the error",
+                                    },
+                                    name: {
+                                       type: "string",
+                                       description: "Error name",
+                                       default: "ZodError",
+                                    },
+                                 },
                               },
-                              message: { type: "string", default: "Invalid param" },
                            },
                         },
                      },

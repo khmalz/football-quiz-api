@@ -5,7 +5,17 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { hashSync, compareSync } from "bcrypt-edge";
 
-import { addDocument, addDocumentToSubCollectionWithFixedId, retrieveDataByDocId, retrieveDataByFields, retrieveDataSubByDocId, retrieveDataSubByFieldsByDocId, retrieveThirdDocByDocId, updateDocument } from "../lib/firestore/service";
+import {
+   addDocument,
+   addDocumentToSubCollectionWithFixedId,
+   retrieveAllScoreUser,
+   retrieveDataByDocId,
+   retrieveDataByFields,
+   retrieveDataSubByDocId,
+   retrieveDataSubByFieldsByDocId,
+   retrieveThirdDocByDocId,
+   updateDocument,
+} from "../lib/firestore/service";
 import { errorHandler, errorMiddleware } from "../lib/middleware/error";
 import { User } from "../data/interface/user";
 
@@ -250,19 +260,79 @@ api.post(
 );
 
 api.get(
+   "/scores/get/:category",
+   zValidator(
+      "param",
+      z
+         .object({
+            category: z.enum(validCategories, { message: "Category must be one of the league" }),
+         })
+         .required()
+   ),
+   zValidator(
+      "query",
+      z
+         .object({
+            sum: z.enum(["true", "false"], { message: "Sum is only allowed to be true or false" }),
+         })
+         .partial()
+   ),
+   async c => {
+      const { category } = c.req.param();
+      let { sum } = c.req.valid("query");
+
+      // Set default value to "false" if sum is undefined
+      sum = sum === undefined ? "false" : sum;
+
+      const isSum: boolean = sum === "true";
+
+      const scoreUsers = await retrieveAllScoreUser(category);
+
+      if (scoreUsers.length === 0) {
+         throw new HTTPException(404, { message: "The document of the category not found" });
+      }
+
+      const data = scoreUsers.map(user => {
+         const { username, name, scores } = user;
+
+         let scoreData;
+         if (isSum) {
+            const total = Object.values(scores.levels as Record<string, { score: number }>).reduce((acc, level) => acc + level.score, 0);
+            scoreData = {
+               category,
+               total,
+            };
+         } else {
+            scoreData = {
+               category,
+               levels: scores.levels,
+            };
+         }
+
+         return {
+            username,
+            name,
+            scores: scoreData,
+         };
+      });
+
+      return c.json({
+         success: true,
+         statusCode: 200,
+         data,
+      });
+   }
+);
+
+api.get(
    "/questions/category/:category",
    zValidator(
       "param",
       z
          .object({
-            category: z.enum(validCategories),
+            category: z.enum(validCategories, { message: "Category must be one of the league" }),
          })
-         .required(),
-      (result, c) => {
-         if (!result.success) {
-            throw new HTTPException(400, { message: "Invalid param" });
-         }
-      }
+         .required()
    ),
    async c => {
       const { category } = c.req.valid("param");

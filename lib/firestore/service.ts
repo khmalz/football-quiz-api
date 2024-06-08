@@ -245,6 +245,36 @@ export async function addDocumentToSubCollectionWithFixedId(collectionName: stri
    }
 }
 
+// ----------------------------------------------
+
+export async function retrieveAllScoreUser(category: string) {
+   const usersCollectionRef = collection(firestore, "users");
+   const usersSnapshot = await getDocs(usersCollectionRef);
+   const usersData: any[] = [];
+
+   for (const userDoc of usersSnapshot.docs) {
+      const userData = userDoc.data();
+      const scoresCollectionRef = collection(userDoc.ref, "scores");
+      const scoresDocRef = doc(scoresCollectionRef, category);
+      const scoresDoc = await getDoc(scoresDocRef);
+
+      if (scoresDoc.exists()) {
+         const scoresData = scoresDoc.data();
+         usersData.push({
+            user_id: userDoc.id,
+            username: userData.username,
+            name: userData.name,
+            scores: {
+               category,
+               levels: scoresData.levels,
+            },
+         });
+      }
+   }
+
+   return usersData;
+}
+
 /**
  *
  * @deprecated the method is not stable
