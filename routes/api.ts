@@ -296,12 +296,14 @@ api.get(
          const { username, name, scores } = user;
 
          let scoreData;
+         let sortScore;
          if (isSum) {
             const total = Object.values(scores.levels as Record<string, { score: number }>).reduce((acc, level) => acc + level.score, 0);
             scoreData = {
                category,
                total,
             };
+            sortScore = total;
          } else {
             scoreData = {
                category,
@@ -313,13 +315,24 @@ api.get(
             username,
             name,
             scores: scoreData,
+            ...(isSum && { sortScore }), // Conditionally add sortScore field only if isSum is true
          };
       });
+
+      // Sort the data based on the sortScore if isSum is true
+      let sortedData;
+      if (isSum) {
+         data.sort((a, b) => (b.sortScore ?? 0) - (a.sortScore ?? 0));
+         // Remove the sortScore field from the final output
+         sortedData = data.map(({ sortScore, ...rest }) => rest);
+      } else {
+         sortedData = data;
+      }
 
       return c.json({
          success: true,
          statusCode: 200,
-         data,
+         data: sortedData,
       });
    }
 );
