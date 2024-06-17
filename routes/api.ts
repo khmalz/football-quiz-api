@@ -356,6 +356,9 @@ api.get(
          throw new HTTPException(404, { message: "Questions not found" });
       }
 
+      const randomComparator = () => Math.random() - 0.5;
+      questions.sort(randomComparator);
+
       const filteredQuestions = questions.map(({ id, ...rest }: any) => rest);
 
       return c.json({
@@ -385,6 +388,9 @@ api.get(
       if (questions.length === 0) {
          throw new HTTPException(404, { message: "Questions not found" });
       }
+
+      const randomComparator = () => Math.random() - 0.5;
+      questions.sort(randomComparator);
 
       const filteredQuestions = questions.map(({ mainDocId, subDocId, ...rest }: any) => rest);
 
