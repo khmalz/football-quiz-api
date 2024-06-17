@@ -862,7 +862,7 @@ export const openApiSpec = {
                            },
                            category: {
                               type: "string",
-                              description: "Available values: championsleague, premierleague, laliga",
+                              description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                               example: "championsleague",
                            },
                         },
@@ -1087,7 +1087,7 @@ export const openApiSpec = {
                            },
                            category: {
                               type: "string",
-                              description: "Available values: championsleague, premierleague, laliga",
+                              description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                               example: "championsleague",
                            },
                            level: {
@@ -1325,7 +1325,7 @@ export const openApiSpec = {
                   name: "category",
                   in: "path",
                   required: true,
-                  description: "Available values: championsleague, premierleague, laliga",
+                  description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                   example: "championsleague",
                },
                {
@@ -1544,7 +1544,7 @@ export const openApiSpec = {
                                              options: {
                                                 type: "array",
                                                 default: ["championsleague", "premierleague", "laliga"],
-                                                description: "Available values: championsleague, premierleague, laliga",
+                                                description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                                              },
                                              path: {
                                                 type: "array",
@@ -1633,7 +1633,7 @@ export const openApiSpec = {
                   name: "category",
                   in: "path",
                   required: true,
-                  description: "Available values: championsleague, premierleague, laliga",
+                  description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                   example: "championsleague",
                },
             ],
@@ -1714,7 +1714,7 @@ export const openApiSpec = {
                                              options: {
                                                 type: "array",
                                                 default: ["championsleague", "premierleague", "laliga"],
-                                                description: "Available values: championsleague, premierleague, laliga",
+                                                description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                                              },
                                              path: {
                                                 type: "array",
@@ -1803,7 +1803,7 @@ export const openApiSpec = {
                   name: "category",
                   in: "path",
                   required: true,
-                  description: "Available values: championsleague, premierleague, laliga",
+                  description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                   example: "championsleague",
                },
                {
@@ -1891,7 +1891,7 @@ export const openApiSpec = {
                                              options: {
                                                 type: "array",
                                                 default: ["championsleague", "premierleague", "laliga"],
-                                                description: "Available values: championsleague, premierleague, laliga",
+                                                description: "Available values: championsleague, premierleague, laliga, seriea, europaleague, worldcup, euro, copaamerica, asiancup, balondor",
                                              },
                                              path: {
                                                 type: "array",

@@ -158,7 +158,7 @@ api.post(
    }
 );
 
-const validCategories = ["championsleague", "premierleague", "laliga"] as const;
+const validCategories = ["championsleague", "premierleague", "laliga", "seriea", "europaleague", "worldcup", "euro", "copaamerica", "asiancup", "balondor"] as const;
 
 api.post(
    "/score/get",
