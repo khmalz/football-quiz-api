@@ -9,7 +9,11 @@
          "use": "@vercel/node"
       },
       {
-         "src": "data/**/*",
+         "src": "data/interface/*",
+         "use": "@vercel/node"
+      },
+      {
+         "src": "data/swagger/routes.ts",
          "use": "@vercel/node"
       }
    ],
